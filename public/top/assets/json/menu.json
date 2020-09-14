@@ -1,0 +1,72 @@
+{
+    "menu": [
+        {
+            "idmenu"    : 1,
+            "name"      : "Kategori",
+            "link"      : "category",
+            "active"    : 1
+        },
+        {
+            "idmenu"    : 2,
+            "name"      : "Agenda",
+            "link"      : "agenda",
+            "active"    : 1
+        },
+        {
+            "idmenu"    : 3,
+            "name"      : "Video",
+            "link"      : "video",
+            "active"    : 1
+        },
+        {
+            "idmenu"    : 4,
+            "name"      : "Artikel",
+            "link"      : "article",
+            "active"    : 1
+        },
+        {
+            "idmenu"    : 5,
+            "name"      : "E-Warta",
+            "link"      : "ewarta",
+            "active"    : 1
+        },
+        {
+            "idmenu"    : 6,
+            "name"      : "Setting",
+            "link"      : "",
+            "submenu"      : [
+                {
+                    "idmenu"    : 1,
+                    "name"      : "Visi & Misi",
+                    "link"      : "visimisi",
+                    "active"    : 1 
+                },
+                {
+                    "idmenu"    : 1,
+                    "name"      : "Profil",
+                    "link"      : "profile",
+                    "active"    : 1 
+                },
+                {
+                    "idmenu"    : 1,
+                    "name"      : "Lookup",
+                    "link"      : "lookup",
+                    "active"    : 1 
+                },
+                {
+                    "idmenu"    : 1,
+                    "name"      : "Tags management",
+                    "link"      : "tags",
+                    "active"    : 1 
+                },
+                {
+                    "idmenu"    : 1,
+                    "name"      : "Akun",
+                    "link"      : "account",
+                    "active"    : 1 
+                }
+            ],
+            "active"    : 1
+        }
+    ]
+}
