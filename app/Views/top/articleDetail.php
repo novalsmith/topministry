@@ -6,11 +6,11 @@
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="CategoryModalLabels">Confirm !</h5>
+              <h5 class="modal-title" id="CategoryModalLabels">Konfirmasi !</h5>
             </div>
             <div class="modal-body">
           
-                <span>Are you sure, for delete this record ?<span>
+                <span>Anda yakin, untuk hapus data ini ?<span>
                 </div>
             <div class="modal-footer">
             <button type="button" id="modal-btn1-true"  class="btn btn-primary btn-md pl--20" data-style="zoom-out"><i class="fa fa-trash"></i> Yes</button>
@@ -42,7 +42,7 @@
 				<div class="HidePage" id="articleDetailPage">
 					<div class="mb-1">
 						<div class="row m-2 col-md-12">
-							<h4 class="text text-muted">Article Detail</h4>
+							<h4 class="text text-muted">Detil Artikel</h4>
 						</div>
 					
 					</div>
@@ -118,8 +118,6 @@
 		</div>
 	</section>
 
-	    
-
 <!-- Modal -->
 <section id="articleDetailPreview" class="HidePage">
 	<div class="container pt-150">
@@ -160,9 +158,6 @@
 			</div>
 		</div>
 	</section>
-	<script src="
-		<?php echo base_url("top/assets/js/commond.js?v=").JsandCssVersion ?>">
-	</script>  
-	<script src="
-		<?php echo base_url("top/assets/js/articleDetails.js?v=").JsandCssVersion ?>">
-	</script>  
+	
+	<script src="<?php echo base_url("top/assets/js/commond.js?v=").JsandCssVersion ?>"></script>  
+	<script src="<?php echo base_url("top/assets/js/articleDetails.js?v=").JsandCssVersion ?>"></script>  

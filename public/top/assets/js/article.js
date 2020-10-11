@@ -13,12 +13,16 @@ var app = new Vue({
 		url : "",
 		fileupload : "",
         listDataVideo : [],
-        listCategory : [],
+		listLookup : [],
+		listCategory : [],
 		BaseUrl : page.BaseUrl,
-		BaseUrlroot : page.BaseUrlroot
+		BaseUrlroot : page.BaseUrlroot,
+		rolesId : Cookies.get('roles')
 	},
 	mounted : function() {
+		Auth.getToken();
 		this.InitOnload();
+		this.GetLookup();
         this.GetDataArticle();
         this.GetCategory();
 	},
@@ -26,17 +30,26 @@ var app = new Vue({
     {
         GetDataArticle : function()
         {
+			// show 1 data when status is member, if admin the show all data 			 
+			var setRolesId = parseInt(this.rolesId) != 1 ? Cookies.get('id') : null;
+
             $.ajax({
                 type: "GET",
                 contentType: "application/json",
                 dataType: 'json',
 				url:this.BaseUrl+'article',
                 success: function(Result){
-					var Category = $.grep(Result.data, function(value,key){
-						return value != null;
+					 
+					var listData = $.grep(Result.data, function(value,key){
+
+						if(setRolesId != null){
+							return  value.createby == setRolesId;
+						}else{
+							return value != null;
+						}
 					});
-					app.renderTable(Category);
-					app.listDataVideo.push(Category);
+					app.renderTable(listData);
+					app.listDataVideo.push(listData);
 					$('#loading').hide();
 					$('#VideoPage').show();
 					
@@ -52,6 +65,37 @@ var app = new Vue({
 		reload : function(){
 			app.GetDataArticle();
 		},
+		GetLookup: function() {
+			$.ajax({
+			  type: "GET",
+			  contentType: "application/json",
+			  dataType: 'json',
+			  url: this.BaseUrl + 'lookup',
+			  success: function(Result) {
+				var listData = [];
+				$.each(Result.data, function(key, value) {
+	  
+				  var getData = {
+					id: value.code,
+					text: value.valueCategory,
+					status: value.idlookupCategory
+				  };
+				  listData.push(getData);
+				});
+	  
+				var setnew = $.grep(listData, function(val, key) {
+				  return val.status == 2;
+				});
+				listLookup = setnew;
+			  }
+			}).fail(function(jqxhr) {
+			  app.renderTable([]);
+			  $('#alertMessagePage').show();
+			  $('#alertMessage').addClass('alert-danger');
+			  $('#MainMessage').html('<span><b> Perhatian - </b> Terjadi kesalahan saat meminta data lookup, Info : ' + jqxhr.statusText + '</span>');
+			  $('#loading').hide();
+			});
+		  },
         GetCategory : function()
         {
             $.ajax({
@@ -110,7 +154,6 @@ var app = new Vue({
 				
 					app.fileuploadName = Result.data.poster;
 					$("#modal-btn-article-true").on("click", function() {
-						console.log('deleted clicker');
 						app.deleteArticle();
 						$("#mi-modal-article").modal('hide');
 				
@@ -195,7 +238,11 @@ var app = new Vue({
                 { data: "nama_categori"},
 				{
 					render: function ( data, type, row ) {
-						return '<span class="badge badge-secondary">'+(row["status"]==1 ? "Active":"No Active")+'</span>'
+						var statusName = $.grep(listLookup, function(val, key) {
+							return val.id == row.status;
+						  })[0];
+						  return '<span class="badge badge-secondary">' + (statusName.text) + '</span>';
+					 
 					},
 					width:"10%",
 				},

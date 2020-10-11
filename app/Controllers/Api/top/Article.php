@@ -52,6 +52,7 @@ class Article extends ResourceController
         $category   = $this->request->getPost('category');
         $status     = $this->request->getPost('status');
         $tags       = $this->request->getPost('tags');
+        $createby = $this->request->getPost('createby');
         $avatar     = $this->request->getFile('fileupload');
 
         if( $avatar  !=null){
@@ -65,6 +66,7 @@ class Article extends ResourceController
                 'status' => $status,
                 'tags' => $tags,
                 'createdate' =>  date('Y m d H i s'),
+                'createby' => $createby,
                 'poster' =>   $setFilename,
             ];
         }else{
@@ -74,6 +76,7 @@ class Article extends ResourceController
                 'id_categori' => $category,
                 'status' => $status,
                 'tags' => $tags,
+                'createby' => $createby,
                 'createdate' =>  date('Y m d H i s')
             ];
         }    
@@ -89,7 +92,7 @@ class Article extends ResourceController
             if(!$Exists){
 
                 $resultData = $this->articlemodel->insertArticle($data);
-            
+                $this->tagsmodel->insertTags($tags,$id_article);
                 if($resultData ==true){
                 
                     if($avatar != null){

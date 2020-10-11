@@ -1,5 +1,5 @@
 <?php 
-namespace App\Controllers\Page\TopMinistry;
+namespace App\Controllers\Page\top;
 // Panggil JWT
 // use \Firebase\JWT\JWT;
 // panggil class Auht
@@ -19,6 +19,7 @@ class Home extends BaseController
     }
     public function index()
     {
-        echo view('top/loginPage');
+        echo true;
+        // echo view('top/loginPage');
     }
 }

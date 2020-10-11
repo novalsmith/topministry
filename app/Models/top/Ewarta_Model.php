@@ -19,46 +19,49 @@ class Ewarta_model extends Model {
             return $this->getWhere(['idewarta' => $id])->getRowArray();
         }  
     }
-    public function insertVideo($data)
+    public function insertWarta($data)
     {
         $query =  $this->db->table($this->table)->insert($data);
         return $query ? true : false;
     }
-    public function updateVideo($data, $id)
+    public function updateWarta($data, $id)
     {
-        $query = $this->db->table($this->table)->update($data, ['id_video' => $id]);
+        $query = $this->db->table($this->table)->update($data, ['id_warta' => $id]);
         return $query ? true : false;
     }
-    public function deleteVideo($id)
+    public function deleteWarta($id)
     {
-        $query = $this->db->table($this->table)->delete(['id_video' => $id]);
+        $query = $this->db->table($this->table)->delete(['id_warta' => $id]);
         return $query ? true : false;
     }
 
-    public function VideoExists($judul,$url,$id_video){
+    public function WartaExists($judul,$id_warta)
+    {
         $data = [
             'judul' => $judul,
-            'link' => $url
+            'id_categori' => $id_categori
         ];
 
-        if($id_video == null){
+        if($id_warta == null)
+        {
 
             $this->where($data);
-        $query  =  $this->get()->getRowArray();
-        if($query != ""){
-            return true;
-        }else{
-            return false;
+            $query  =  $this->get()->getRowArray();
+            if($query != ""){
+                return true;
+            }else{
+                return false;
+            }
+        }else
+        {
+            $this->where($data);
+            $this->where(['id_warta <>' => $id_warta]);
+            $query  =  $this->get()->getRowArray();
+            if($query != ""){
+                return true;
+            }else{
+                return false;
+            }
         }
-    }else{
-        $this->where($data);
-        $this->where(['id_video <>' => $id_video]);
-        $query  =  $this->get()->getRowArray();
-        if($query != ""){
-            return true;
-        }else{
-            return false;
-        }
-    }
     }
 } 

@@ -41,54 +41,66 @@ class Ewarta extends ResourceController
     public function create()
     {
         helper(['form', 'url']);
-        $validation =  \Config\Services::validation();
-        $judul      = $this->request->getPost('judul');
-        $keterangan      = $this->request->getPost('keterangan');
-        $category      = $this->request->getPost('category');
-        $status      = $this->request->getPost('status');
-        $url      = $this->request->getPost('url');
-        $avatar = $this->request->getFile('fileupload');
+        $validation     =  \Config\Services::validation();
+        $judul          = $this->request->getPost('title');
+        $keterangan     = $this->request->getPost('description');
+        $category       = $this->request->getPost('id_categori');
+        $status         = $this->request->getPost('status');
+        $waktu            = $this->request->getPost('timepublish');
+        $avatarPoster   = $this->request->getFile('poster');
+        $avatarWarta    = $this->request->getFile('filewarta');
 
-        if( $avatar  !=null){
-            $split = explode(".",$avatar->getName());
-            $arr = array($split[0].'_top'.date('YmdHis'),$split[1]);
-            $setFilename = implode(".",$arr);
+        if( $avatarPoster !=null && $avatarWarta !=null){
+            // poster
+            $splitPoster = explode(".",$avatarPoster->getName());
+            $arrPoster = array($splitPoster[0].'_top'.date('YmdHis'),$splitPoster[1]);
+            $setFilenamePoster = implode(".",$arrPoster);
+
+            // warta
+            $splitWarta = explode(".",$avatarWarta->getName());
+            $arrWarta = array($splitWarta[0].'_top'.date('YmdHis'),$splitWarta[1]);
+            $setFilenameWarta = implode(".",$arrWarta);
+
+
             $data = [
-                'judul' => $judul,
-                'keterangan' => $keterangan,
+                'title' => $judul,
+                'description' => $keterangan,
                 'id_categori' => $category,
                 'status' => $status,
-                'link' => $url,
+                'timepublish' => $waktu,
                 'createdate' =>  date('Y m d H i s'),
-                'poster' =>   $setFilename,
+                'poster' =>   $setFilenamePoster,
+                'filewarta' =>   $setFilenameWarta
             ];
         }else{
             
             $data = [
-                'judul' => $judul,
-                'keterangan' => $keterangan,
+                'title' => $judul,
+                'description' => $keterangan,
                 'id_categori' => $category,
                 'status' => $status,
-                'link' => $url,
+                'timepublish' => $waktu,
                 'createdate' =>  date('Y m d H i s')
             ];
         }    
-        if($validation->run($data, 'video') == FALSE){
+        if($validation->run($data, 'warta') == FALSE){
             $response = [
                 'status' => 500,
                 'error' => true,
-                'data' => $validation->getErrors(),
+                'data' => [],
+                'message' => $validation->getErrors()
             ];
             return $this->respond($response, 500);
         } else {
-            $Exists = $this->ewarta->VideoExists($judul, $url,$idewarta = null);
+            $Exists = $this->ewarta->WartaExists($judul, $idewarta = null);
             if(!$Exists){
 
-                $resultData = $this->ewarta->insertVideo($data);
+                $resultData = $this->ewarta->insertWarta($data);
             
                 if($resultData ==true){
-                    if($avatar != null){
-                    $avatar->move(ROOTPATH . 'public/top/assets/img/Admin/video',  $setFilename);
+                    if($avatarPoster != null || $avatarWarta != null){
+                    $avatarPoster->move(ROOTPATH . 'public/top/assets/img/Admin/warta',  $setFilenamePoster);
+                    $avatarWarta->move(ROOTPATH . 'public/top/assets/img/Admin/warta',  $setFilenameWarta);
                     }
                     $output = [
                         'status'    => true,
@@ -109,7 +121,7 @@ class Ewarta extends ResourceController
                 $output = [
                     'status'    => false,
                     "data"      => [],
-                    "message"   => "Agenda sudah ada."
+                    "message"   => "Warta sudah ada."
                 ];
                 return $this->respond($output, 200);
             }
@@ -118,39 +130,56 @@ class Ewarta extends ResourceController
     public function update($idewarta=null)
     {
         $validation =  \Config\Services::validation();
-        $judul      = $this->request->getPost('judul');
-        $keterangan      = $this->request->getPost('keterangan');
-        $category      = $this->request->getPost('category');
-        $status      = $this->request->getPost('status');
-        $url      = $this->request->getPost('url');
-        $avatar = $this->request->getFile('fileupload');
-        $oldfileupload      = $this->request->getPost('oldfileupload');  
+        $judul          = $this->request->getPost('title');
+        $keterangan     = $this->request->getPost('description');
+        $category       = $this->request->getPost('id_categori');
+        $status         = $this->request->getPost('status');
+        $waktu          = $this->request->getPost('timepublish');
+        $avatarPoster   = $this->request->getFile('poster');
+        $avatarWarta    = $this->request->getFile('filewarta');
+        $oldfileuploadPoster = $this->request->getPost('oldfileuploadPoster');  
+        $oldfileuploadWarta  = $this->request->getPost('oldfileuploadWarta');  
 
-        if( $avatar  !=null){
-            $split = explode(".",$avatar->getName());
-            $arr = array($split[0].'_top'.date('YmdHis'),$split[1]);
-            $setFilename = implode(".",$arr);
+        if( $avatarPoster !=null || $avatarWarta !=null){
+            // poster
+            if($avatarPoster !=null)
+            {
+                $splitPoster = explode(".",$avatarPoster->getName());
+                $arrPoster = array($splitPoster[0].'_top'.date('YmdHis'),$splitPoster[1]);
+                $setFilenamePoster = implode(".",$arrPoster);
+            }
+
+            // warta
+            if($avatarWarta !=null)
+            {
+                $splitWarta = explode(".",$avatarWarta->getName());
+                $arrWarta = array($splitWarta[0].'_top'.date('YmdHis'),$splitWarta[1]);
+                $setFilenameWarta = implode(".",$arrWarta);
+            }
+ 
             $data = [
-                'judul' => $judul,
-                'keterangan' => $keterangan,
+                'title' => $judul,
+                'description' => $keterangan,
                 'id_categori' => $category,
                 'status' => $status,
-                'link' => $url,
-                'poster' =>   $setFilename,
+                'timepublish' => $waktu,
+                'createdate' =>  date('Y m d H i s'),
+                'poster' =>   $setFilenamePoster,
+                'filewarta' =>   $setFilenameWarta
             ];
         }else{
             
             $data = [
-                'judul' => $judul,
-                'keterangan' => $keterangan,
+                'title' => $judul,
+                'description' => $keterangan,
                 'id_categori' => $category,
                 'status' => $status,
-                'link' => $url,
-                'createdate' =>  date('Y m d H i s'),
+                'timepublish' => $waktu,
+                'createdate' =>  date('Y m d H i s')
             ];
         }    
     
-        if($validation->run($data, 'video') == FALSE){
+        if($validation->run($data, 'warta') == FALSE){
             $response = [
                 'status' => 500,
                 'error' => true,
@@ -158,14 +187,20 @@ class Ewarta extends ResourceController
             ];
             return $this->respond($response, 500);
         } else {
-            $Exists = $this->ewarta->VideoExists($judul, $url,$idewarta);
+            $Exists = $this->ewarta->WartaExists($judul,$idewarta);
             if(!$Exists)
             {
-                $resultData = $this->ewarta->updateVideo($data,$idewarta);
+                $resultData = $this->ewarta->updateWarta($data,$idewarta);
                 if($resultData ==true){
-                    if($avatar != null){
-                        $avatar->move(ROOTPATH . 'public/top/assets/img/Admin/video', $setFilename);
-                        unlink(ROOTPATH . 'public/top/assets/img/Admin/video/'.$oldfileupload);
+                    if($avatarPoster != null )
+                    {
+                        $avatarPoster->move(ROOTPATH . 'public/top/assets/img/Admin/warta',  $setFilenamePoster);
+                     
+                    }
+                    
+                    if($avatarWarta != null)
+                    {
+                        $avatarWarta->move(ROOTPATH . 'public/top/assets/img/Admin/warta',  $setFilenameWarta);
                     }
                     $output = [
                         'status'    => $resultData,
@@ -194,21 +229,25 @@ class Ewarta extends ResourceController
     }
     public function delete($idewarta = NULL)
     {
-        $oldfileupload = $this->request->getPost('oldfileupload');
-        $hapus = $this->ewarta->deleteVideo($idewarta);
+        $oldfileuploadPoster = $this->request->getPost('oldfileuploadPoster');
+        $oldfileuploadWarta = $this->request->getPost('oldfileuploadWarta');
+        $hapus = $this->ewarta->deleteWarta($idewarta);
         if($hapus){
             $code = 200;
-            $msg = 'Deleted agenda successfully';
+            $msg = 'Deleted warta successfully';
             $response = [
                 'status' => $code,
                 'error' => false,
                 'data' => [],
                 'message' =>$msg
             ];
-            if($oldfileupload !=""){
-                unlink(ROOTPATH . 'public/top/assets/img/Admin/video/'.$oldfileupload);
+            if($oldfileuploadPoster != null || $oldfileuploadWarta != null)
+            {
+                unlink(ROOTPATH . 'public/top/assets/img/Admin/warta/'.$oldfileuploadPoster);
+                unlink(ROOTPATH . 'public/top/assets/img/Admin/warta/'.$oldfileuploadWarta);
             }
-        } else {
+        } else 
+        {
             $code = 401;
             $msg = 'Not Found';
             $response = [

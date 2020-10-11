@@ -1,12 +1,16 @@
 <?php 
+$this->session = \Config\Services::session();
+$this->session->start();
+
 echo View("templates/header");
 ?> 
 
   <div id="MainApp">
       <nav id="navbar-main" class="navbar navbar-main navbar-expand-lg navbar-transparent navbar-light headroom">
     <div class="container">
-      <a class="navbar-brand mr-lg-5" href="../index.html">
-        TOP Ministry
+    <img src="<?php echo base_url('top/assets/img/pages/top.jpeg')?>" style="width:3%; height:30px" class="mr-2" />	 
+      <a class="navbar-brand mr-lg-5" href="<?php echo base_url('main') ?>">
+       TOP Ministry
       </a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_global" aria-controls="navbar_global" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -25,55 +29,72 @@ echo View("templates/header");
             </div>
           </div>
         </div>
-        <ul class="navbar-nav navbar-nav-hover align-items-lg-center">
+        <ul class="navbar-nav navbar-nav-hover align-items-lg-center" id="menupage">
+            <?php if(session()->get('roles')== 1) : ?>
               <li class="nav-item">
-                <a class="nav-link nav-link-icon" href="<?php echo base_url('page/top/main/category') ?>">
-                  <span class="nav-link-inner--text d-lg">Category</span>
+                <a class="nav-link nav-link-icon" href="<?php echo base_url('main/category') ?>">
+                  <span class="nav-link-inner--text d-lg">Kategori</span>
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link nav-link-icon" href="<?php echo base_url('page/top/main/agenda') ?>">
+                <a class="nav-link nav-link-icon" href="<?php echo base_url('main/agenda') ?>">
                   <span class="nav-link-inner--text d-lg">Agenda</span>
                 </a>
               </li>
               <li class="nav-item">
-              <a class="nav-link nav-link-icon" href="<?php echo base_url('page/top/main/video') ?>">
+              <a class="nav-link nav-link-icon" href="<?php echo base_url('main/video') ?>">
                   <span class="nav-link-inner--text d-lg">Video</span>
                 </a>
               </li>
-              <li class="nav-item">
-              <a class="nav-link nav-link-icon" href="<?php echo base_url('page/top/main/article') ?>">
-                  <span class="nav-link-inner--text d-lg">Article</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link nav-link-icon" href="<?php echo base_url('page/top/main/ewarta') ?>">
-                  <span class="nav-link-inner--text d-lg">E-Warta</span>
-                </a>
-              </li>
+
               <li class="nav-item dropdown">
                 <a class="nav-link nav-link-icon dropdown-toggle" href="javascript:;" id="navbar-success_dropdown_1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="ni ni-settings-gear-65"></i>
-                  <span class="nav-link-inner--text d-lg">Settings</span>
+                  <span class="nav-link-inner--text d-lg mr-1">Artikel</span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbar-success_dropdown_1">
-                  <a class="dropdown-item" href="javascript:;">Visi & Misi</a>
-                  <a class="dropdown-item" href="javascript:;">Profil</a>
-                  <a class="dropdown-item" href="javascript:;">Lookup</a>
-                  <a class="dropdown-item" href="javascript:;">Tags management</a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="javascript:;">Akun</a>
-                </div>
+                  <a class="dropdown-item" href="<?php echo base_url('main/article') ?>">List Artikel</a>
+                 
+                  <a class="dropdown-item" href="<?php echo base_url('main/tags') ?>">Tags</a>
+                 
               </li>
-          
+              
+              <?php endif; ?>
+
+              <?php if(session()->get('roles')== 0) : ?>
+              <li class="nav-item">
+              <a class="nav-link nav-link-icon" href="<?php echo base_url('main/article') ?>">
+                  <span class="nav-link-inner--text d-lg">Artikel</span>
+                </a>
+              </li>
+            <?php endif; ?>
+
+            
+              <?php if(session()->get('roles')== 1) : ?>
+              <li class="nav-item">
+                  <a class="nav-link nav-link-icon" href="<?php echo base_url('main/lookup') ?>">
+                      <span class="nav-link-inner--text d-lg">Lookup</span>
+                  </a>
+              </li>
+              <?php endif; ?>
         </ul>
-        <ul class="navbar-nav align-items-lg-center ml-lg-auto">
+        <ul class="navbar-nav align-items-lg-center navbar-nav-hover  ml-lg-auto">
           
         <li class="nav-item">
                 <a class="nav-link nav-link-icon" href="javascript:;">
                   <span class="nav-link-inner--text d-lg" id="timeNow"></span>
                 </a>
+
+                <li class="nav-item dropdown">
+                <a class="nav-link nav-link-icon dropdown-toggle" href="javascript:;" id="navbar-success_dropdown_1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <span class="nav-link-inner--text d-lg mr-1"><?php  echo session()->get("name") ?></span> 
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbar-success_dropdown_1">
+                  <a class="dropdown-item" href="<?php echo base_url('main/account') ?>">Akun</a>
+                  <a class="dropdown-item" href="javascript:void(0)" onclick="Auth.logout()">Logout</a>
+                </div>
               </li>
+
+        </li>
         </ul>
       </div>
     </div>

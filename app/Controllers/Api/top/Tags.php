@@ -12,7 +12,7 @@ class Tags extends ResourceController
 {
     public function __construct()
     {
-        // $this->protect = new Auth();
+         
         $this->tagsmodel = new Tags_Model();
     }
     public function index()

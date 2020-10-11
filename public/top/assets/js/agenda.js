@@ -15,11 +15,14 @@ var app = new Vue({
 		fileupload : "",
 		listAgenda : [],
 		listHeaderCategory : [],
+		listLookup : [],
 		BaseUrl : page.BaseUrl,
 		BaseUrlroot : page.BaseUrlroot
 	},
 	mounted : function() {
+		Auth.getToken();
 		this.InitOnload();
+		this.GetLookup();
 		this.GetAgenda();
 	},
     methods:
@@ -49,6 +52,49 @@ var app = new Vue({
 				$('#loading').hide();
 			});
 		},
+		GetLookup : function()
+        {
+            $.ajax({
+                type: "GET",
+                contentType: "application/json",
+                dataType: 'json',
+				url:this.BaseUrl+'lookup',
+                success: function(Result){
+				var listData = [];	 
+				$.each(Result.data, function(key,value){
+					
+					var getData = {
+						id : value.code,
+						text : value.valueCategory,
+						status : value.idlookupCategory
+					}
+					listData.push(getData);
+				});
+				 
+				var setnew = $.grep(listData, function(val, key){
+					return val.status == 2
+				});
+					listLookup = setnew;
+					app.loadStatus(setnew);
+                }
+            }).fail(function(jqxhr){
+				app.renderTable([]);
+				$('#alertMessagePage').show();
+				$('#alertMessage').addClass('alert-danger');
+				$('#MainMessage').html('<span><b> Perhatian - </b> Terjadi kesalahan saat meminta data agenda, Info : '+jqxhr.statusText+'</span>');
+				$('#loading').hide();
+			});
+		},
+		loadStatus :  function(listData){
+			$("#status_posting").select2({
+				theme: 'bootstrap4',
+				dropdownParent: $('#StatusPage'),
+				width: "100%", 
+				placeholder: "Status",
+				data : listData,
+				minimumResultsForSearch: -1
+				});
+		},
 		
 		create : function()
 		{
@@ -64,7 +110,7 @@ var app = new Vue({
 				formData.append('keterangan',dataKeterangan);
 				formData.append('tgl_posting',dataTglPosting);
 				formData.append('fileupload',filename);
-				formData.append('status_tampil',0);
+				formData.append('status_tampil',"A002");
 				var l = Ladda.create( document.querySelector( '#saveAddAgenda'));
 			$.ajax({
 				type:'POST',
@@ -117,7 +163,7 @@ var app = new Vue({
 		createNew : function(){
 				this.isUpdate = false;
 				$('#showimage').hide();
-				$('#CategoryModalLabel').text("Add Agenda");
+				$('#CategoryModalLabel').text("Tambah Agenda");
 				this.id_agenda = null;
 				this.isUpdate = false;
 				this.status_posting = null;
@@ -159,7 +205,7 @@ var app = new Vue({
 			$('#categoryname').val(row[0].nama_agenda);
 			$('#fileupload').val("");
 			this.resetAlert();
-			$('#CategoryModalLabel').text("Update Agenda");
+			$('#CategoryModalLabel').text("Ubah Agenda");
 			$('#CategoryModal').modal("show");
 		},
 		UpdateAction:function(){
@@ -276,7 +322,13 @@ var app = new Vue({
 				{ data: "tgl_posting"},	
 				{
 					render: function ( data, type, row ) {
-						return '<span class="badge badge-secondary">'+(row["status_tampil"]==1 ? "Active":"No Active")+'</span>'
+
+						var statusName = $.grep(listLookup, function(val, key){
+							return val.id == row["status_tampil"];
+						})[0];
+						 
+						return '<span class="badge badge-secondary">'+(statusName.text)+'</span>'
+						// return '<span class="badge badge-secondary">'+(row["status_tampil"]==1 ? "Active":"No Active")+'</span>'
 					}
 				},
 				{
@@ -319,7 +371,7 @@ var app = new Vue({
 
 		$("#TableAgenda_filter").html("").append(`
 		<div class="pull-right mb-2">
-		<button type="button" class="btn btn-primary btn-sm" onclick="app.createNew()"> <i class="fa fa-plus"></i> Create new</button>
+		<button type="button" class="btn btn-primary btn-sm" onclick="app.createNew()"> <i class="fa fa-plus"></i> Tambah</button>
 		</div>   
 		`);
 		$('#TableAgenda_length select').addClass("rounded-0");
@@ -372,17 +424,7 @@ var app = new Vue({
 		$('#alertMessagePage button').click(function(){
 			app.resetAlert();
 		});
-		$("#status_posting").select2({
-			theme: 'bootstrap4',
-			dropdownParent: $('#StatusPage'),
-			width: "100%", 
-			placeholder: "Status",
-			data : [
-				{id : 0, text:"No Active"},
-				{id : 1, text:"Active"}
-			],
-			minimumResultsForSearch: -1
-			});
+		
 			
 		// 	$("#fileupload").change(function(e) {
 		// 	var _URL = window.URL || window.webkitURL;

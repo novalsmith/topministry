@@ -19,22 +19,45 @@ $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultController('Home');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
-$routes->set404Override();
 $routes->setAutoRoute(true);
 
-/**
- * --------------------------------------------------------------------
- * Route Definitions
- * --------------------------------------------------------------------
- */
+$routes->set404Override(function() {
+	$page = [
+		'title'   => '404 Halaman tidak ditemukan'
+	];
+	return view('top/notfound',$page);
+});
+ 
+ 
+$routes->get('auth', 'page/top/auth::index');
+$routes->get('auth/logout', 'page/top/auth::logout',['filter' => 'authfilter']);
 
-// We get a performance increase by specifying the default
-// route since we don't have to scan directories.
-$routes->get('/', 'Home::index');
-$routes->resource('Category');
-$routes->resource('Tags');
-$routes->resource('Ewarta');
+// for identify original url 
+$routes->group('page/top/main', ['filter' => 'authfilter'], function($routes) {
+    $routes->get('/', 			'page/top/main::index');
+	$routes->get('category',		'page/top/main::category');
+	$routes->get('agenda', 			'page/top/main::agenda');
+	$routes->get('video', 			'page/top/main::video');
+	$routes->get('article', 		'page/top/main::article');
+	$routes->get('articledetail', 	'page/top/main::articledetail');
+	$routes->get('lookup', 			'page/top/main::lookup');
+	$routes->get('tags', 			'page/top/main::tags');
+	$routes->get('account', 		'page/top/main::account');
+});
 
+// for identify route url
+$routes->group('main', ['filter' => 'authfilter'], function($routes) {
+    $routes->get('/', 			'page/top/main::index');
+	$routes->get('category',		'page/top/main::category');
+	$routes->get('agenda', 			'page/top/main::agenda');
+	$routes->get('video', 			'page/top/main::video');
+	$routes->get('article', 		'page/top/main::article');
+	$routes->get('articledetail', 	'page/top/main::articledetail');
+	$routes->get('lookup', 			'page/top/main::lookup');
+	$routes->get('tags', 			'page/top/main::tags');
+	$routes->get('account', 		'page/top/main::account');
+});
+ 
 /**
  * --------------------------------------------------------------------
  * Additional Routing
@@ -52,3 +75,5 @@ if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php'))
 {
 	require APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php';
 }
+ 
+

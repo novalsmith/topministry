@@ -7,10 +7,12 @@ var app = new Vue({
         isUpdate : false,
         categoryVideo : "",
 		keterangan : "",
-		fileuploadName : "",
+		fileuploadNamePoster : "",
+		fileuploadNameWarta : "",
 		status : null,
 		judul : "",
 		url : "",
+		waktu : "",
 		fileupload : "",
         listDataVideo : [],
         listCategory : [],
@@ -18,13 +20,14 @@ var app = new Vue({
 		BaseUrlroot : page.BaseUrlroot
 	},
 	mounted : function() {
+		Auth.getToken();
 		this.InitOnload();
-        this.GetDataVideo();
+        this.GetDataWarta();
 		this.GetCategory();
 	},
     methods:
     {
-        GetDataVideo : function()
+        GetDataWarta : function()
         {
             $.ajax({
                 type: "GET",
@@ -93,24 +96,21 @@ var app = new Vue({
         },
 		create : function()
 		{
-			if ($("#FormVideo").valid()) 
+			if ($("#FormWarta").valid()) 
 			{ 	
-				var dataAgenda = $('#judul').val();
-				var dataKeterangan = this.keterangan;
-				var category = $('#category').val();
-				var url = $('#url').val();
-				var filename = app.$refs.file.files[0]; 
 				var formData =  new FormData();
-				formData.append('judul',dataAgenda);
-				formData.append('keterangan',dataKeterangan);
-				formData.append('category',category);
-				formData.append('fileupload',filename);
+				formData.append('title',$('#judul').val());
+				formData.append('description',this.keterangan);
+				formData.append('timepublish',$('#dateStart').val());
+				formData.append('id_categori',$('#category').val());
+				formData.append('poster',app.$refs.filePoster.files[0]);
+				formData.append('filewarta',app.$refs.fileWarta.files[0]);
 				formData.append('status',0);
-				formData.append('url',url);
-				var l = Ladda.create( document.querySelector( '#saveAddAgenda'));
+				var l = Ladda.create( document.querySelector( '#saveAddWarta'));
+				
 			$.ajax({
 				type:'POST',
-				url: app.BaseUrl+"video/create",
+				url: app.BaseUrl+"ewarta/create",
 				data:formData,
 				cache:false,
 				contentType: false,
@@ -140,43 +140,66 @@ var app = new Vue({
 					<span><b> `+statusMessage+` - </b>`+data.message+` </span>
 					`);
 					l.stop();
-					app.GetDataVideo();
+					app.GetDataWarta();
 				}
 			}).fail(function(jqxhr) {
+				console.log(jqxhr.responseJSON.message['description']);
 					l.stop();
 					$('#CategoryModal').modal("hide");
 					$('#alertMessagePage').show();
 					$('#alertMessage').addClass("alert-danger");
 					$('#status').text("Fail");
-					$('#statusMessage').text(jqxhr.responseJSON);
-					app.GetDataVideo();
+					$('#statusMessage').text(jqxhr.responseJSON.message['description']);
+					app.GetDataWarta();
 				});
 			} 
 		},
 		previewVideo : function()
 		{
-			$("iframe").attr("src", this.url);
+			var getCategory = $.grep(app.listCategory[0], function(val, key){
+				return val.id == app.id_categori;
+			})[0];
+			 
 			$('#modalVideo').modal("show");
+			if( app.fileuploadNamePoster !=null){
+				$('#preview_img').html("<img class='col-md-12 col-sm-12 col-xs-12' src='" + app.BaseUrlroot + "top/assets/img/Admin/warta/" + app.fileuploadNamePoster + "'></img>");		
+			}else{
+				$('#preview_img').html("<p class='col-md-12'>Tidak ada poster</div>");
+			}
+			if( app.fileuploadNameWarta !=null){
+				$('#preview_download').html("<a class='btn btn-sm btn-primary' target='_blank' href='" + app.BaseUrlroot + "top/assets/img/Admin/warta/" + app.fileuploadNameWarta + "'>Download Pdf</a>");
+			}else{
+				 
+				$('#preview_download').html("<p>Tidak ada file warta</div>");
+			}
+			$('#preview_title').text(app.judul);
+			$('#preview_status').text(app.status == 1 ? "Active" : "No Active");
+			$('#preview_kategori').text(getCategory.text);
+			$('#preview_waktu').text(app.waktu);
+			
 			$('#CategoryModal').modal("hide");
 		},
 		createNew : function(){
 				this.isUpdate = false;
-				this.id_video = null;
+				this.id_warta = null;
 				this.isUpdate = false;
 				this.status = "";
 				this.judul = "";
-				this.url = "";
-				this.fileuploadName = "";
+				this.waktu = "";
+				this.fileuploadNamePoster = "";
 				this.keterangan = "";
+			   
 				this.resetAlert();
-
 				$('#showimage').hide();
 				$('#ModalLabel').text("Add E-Warta");
+				$('#status').val("").trigger("change");
 				$('#category').val("").trigger("change");
+				$('#dateStart').val("");
 				$('#CategoryModal').modal("show");
 				
 		},
-		update : function(id_video){
+		update : function(id_warta){
+			this.resetAlert();
             this.isUpdate = true;
             var table = $('#TableEwarta').DataTable();
 			var listdata = []; 
@@ -185,91 +208,84 @@ var app = new Vue({
 					listdata.push(data);
 				} );
 			var row = $.grep(listdata, function(val, key){
-				return val.id_video === id_video;
+				return val.id_warta === id_warta;
 			});
-			this.id_video = row[0].id_video;
+			this.id_warta = row[0].id_warta;
 			this.url = row[0].link;
-			this.judul = row[0].judul;
+			this.judul = row[0].title;
 			this.fileupload = "";
 			this.status = row[0].status;
-			this.fileuploadName = row[0].poster;
-			this.keterangan = row[0].keterangan;
+			this.waktu = row[0].timepublish;
+			this.fileuploadNamePoster = row[0].poster;
+			this.fileuploadNameWarta = row[0].filewarta;
+			this.keterangan = row[0].description;
+			this.id_categori = row[0].id_categori;
+			$('#dateStart').val(row[0].timepublish);
 			$("#status").val(row[0].status).trigger("change");
 			$("#category").val(row[0].id_categori).trigger("change");
-			if(row[0].poster !=""){
-				$('#showimage').show();
-				$('#showimage').html('<a href="'+app.BaseUrlroot+'top/assets/img/Admin/video/'+row[0].poster+'" target="_blank">Lihat Poster</a>');
-			}else{
-				$('#showimage').hide();
-				$('#showimage').html('');
-			}
 			$('#fileupload').val("");
-			this.resetAlert();
 			$('#ModalLabel').text("Update E-Warta");
 			$('#CategoryModal').modal("show");
 		},
-		UpdateAction:function(){
-			if ($("#FormVideo").valid()) 
+		UpdateAction:function()
+		{
+			if ($("#FormWarta").valid()) 
 			{ 	
-			
-				var judul = $('#judul').val();
-				var dataKeterangan = this.keterangan;
-				var category = $('#category').val();
-				var url = $('#url').val();
-				var status = $('#status').val();
-				console.log();
-				
-				var filename = app.$refs.file.files[0]; 
+				console.log($('#dateStart').val());
 				var formData =  new FormData();
-				formData.append('judul',judul);
-				formData.append('keterangan',dataKeterangan);
-				formData.append('category',category);
-				formData.append('fileupload',filename);
-				formData.append('status',status);
-				formData.append('url',url);
-				formData.append('oldfileupload',app.fileuploadName);
+				formData.append('title',$('#judul').val());
+				formData.append('description',this.keterangan);
+				formData.append('timepublish',$('#dateStart').val());
+				formData.append('id_categori',$('#category').val());
+				formData.append('poster',app.$refs.filePoster.files[0]);
+				formData.append('filewarta',app.$refs.fileWarta.files[0]);
+				formData.append('status',$('#status').val());
+				formData.append('oldfileuploadPoster',app.fileuploadNamePoster);
+				formData.append('oldfileuploadWarta',app.fileuploadNameWarta);
+				formData.append('oldfileuploadPoster',app.fileuploadNamePoster);
+				formData.append('oldfileuploadWarta',app.fileuploadNameWarta);
+				var l = Ladda.create( document.querySelector( '#saveUpdateWarta'));
 
-				var l = Ladda.create( document.querySelector( '#saveUpdateAgenda'));
-			$.ajax({
-				type:'POST',
-				url:app.BaseUrl+"video/update/"+app.id_video,
-				data:formData,
-				cache:false,
-				contentType: false,
-				processData: false,
-				beforeSend: function(){
-					l.start();
-				},
-				success:function(data){
-					$('#TableEwarta').DataTable().clear().destroy();
-					var alert = "";
-					var statusMessage ="";
-					if(data.status){
-						alert = "alert-primary";
-						statusMessage = "Berhasil";
-					
-					}else{
-						alert = "alert-danger";
-						statusMessage = "Terjadi Kesalahan";
+				$.ajax({
+					type:'POST',
+					url:app.BaseUrl+"ewarta/update/"+app.id_warta,
+					data:formData,
+					cache:false,
+					contentType: false,
+					processData: false,
+					beforeSend: function(){
+						l.start();
+					},
+					success:function(data){
+						$('#TableEwarta').DataTable().clear().destroy();
+						var alert = "";
+						var statusMessage ="";
+						if(data.status){
+							alert = "alert-primary";
+							statusMessage = "Berhasil";
+						
+						}else{
+							alert = "alert-danger";
+							statusMessage = "Terjadi Kesalahan";
+						}
+						$('#CategoryModal').modal("hide");
+						$('#alertMessagePage').show();
+						$('#alertMessage').addClass(""+alert+"");
+						$('#MainMessage').html(`
+						<span><b> `+statusMessage+` - </b>`+data.message+` </span>
+						`);
+						l.stop();
+						app.GetDataWarta();
 					}
-					$('#CategoryModal').modal("hide");
-					$('#alertMessagePage').show();
-					$('#alertMessage').addClass(""+alert+"");
-					$('#MainMessage').html(`
-					<span><b> `+statusMessage+` - </b>`+data.message+` </span>
-					`);
-					l.stop();
-					app.GetDataVideo();
-				}
-			}).fail(function(jqxhr) {
-					l.stop();
-					$('#CategoryModal').modal("hide");
-					$('#alertMessagePage').show();
-					$('#alertMessage').addClass("alert-danger");
-					$('#status').text("Fail");
-					$('#statusMessage').text(jqxhr.responseJSON);
-					app.GetDataVideo();
-				});
+					}).fail(function(jqxhr) {
+						l.stop();
+						$('#CategoryModal').modal("hide");
+						$('#alertMessagePage').show();
+						$('#alertMessage').addClass("alert-danger");
+						$('#status').text("Fail");
+						$('#statusMessage').text(jqxhr.responseJSON);
+						app.GetDataWarta();
+					});
 			}
 		},
 		deleteAction : function(){
@@ -277,16 +293,17 @@ var app = new Vue({
 					var l = Ladda.create( document.querySelector( '#modal-btn-true'));
 					l.start();
 					var param = {
-						oldfileupload : this.fileuploadName
+						oldfileuploadPoster : app.fileuploadNamePoster,
+						oldfileuploadWarta : app.fileuploadNameWarta
 						};
-					var jqxhr = $.post(app.BaseUrl+"video/delete/"+this.id_video,param)
+					var jqxhr = $.post(app.BaseUrl+"ewarta/delete/"+this.id_warta,param)
 						.done(function(data) {
 						var alert = "";
 						var statusMessage ="";
 						if(data.status){
 							alert = "alert-primary";
 							statusMessage = "Success";
-							app.GetDataVideo();
+							app.GetDataWarta();
 						}else{
 							alert = "alert-danger";
 							statusMessage = "Fail";
@@ -310,6 +327,7 @@ var app = new Vue({
 		},
 		resetAlert : function(){
 			// Reset Alert
+			$("#FormWarta").validate().resetForm();
 			$('#alertMessagePage').hide();
 			$('#alertMessage').removeClass("alert-primary");
 			$('#alertMessage').removeClass("alert-danger");
@@ -322,7 +340,7 @@ var app = new Vue({
 			retrieve: true,
 			columns: 
 			[
-                { data: "idewarta" },
+                { data: "id_warta" },
                 { 
                     render: function ( data, type, row ) {
                         
@@ -340,7 +358,7 @@ var app = new Vue({
 				},
 				{
 					render: function ( data, type, row ) {
-						return '<a href="javascript:" class="badge badge-primary" onclick="app.update(\''+ row["idewarta"]+ '\');">View</a>';
+						return '<a href="javascript:" class="badge badge-primary" onclick="app.update(\''+ row["id_warta"]+ '\');">View</a>';
 					},
 					targets: -1,  // -1 is the last column, 0 the first, 1 the second, etc.
 					width:"5%",
@@ -389,9 +407,9 @@ var app = new Vue({
 	InitOnload: function()
 	{
 		$('#alertMessagePage').hide();
-		$('#FormVideo').validate({
+		$('#FormWarta').validate({
 			rules: {
-				judul: { required: true, minlength : 3 },
+				judul: { required: true, minlength : 10 },
 				category : { required: true}, 
 				waktu: { required: true},
 				statusVideo : { required: true},
@@ -400,8 +418,8 @@ var app = new Vue({
 			},
 			messages: {
 				judul: {
-					required : "Video masih kosong",
-					minlength : "Minimal 3 karakter"
+					required : "Judul masih kosong",
+					minlength : "Minimal 10 karakter"
 				},
 				waktu : {	required : "Waktu masih kosong"},
 				statusVideo : {	required : "Status masih kosong"},
@@ -431,27 +449,6 @@ var app = new Vue({
             autoclose: true,
             todayHighlight: true,
         });
-		// 	$("#fileupload").change(function(e) {
-		// 	var _URL = window.URL || window.webkitURL;
-		// 	var file, img;
-		// 	if ((file = this.files[0])) {
-		// 		img = new Image();
-		// 		img.onload = function() {
-		// 			if(this.width == 300 && this.height == 500){
-		// 				sizeValidate
-		// 			}else{
-
-		// 			}
-		// 			alert(this.width + " " + this.height);
-		// 		};
-		// 		img.onerror = function() {
-		// 			$("#fileupload").val(null);
-		// 			alert( "not a valid file: " + file.type);
-		// 		};
-		// 		img.src = _URL.createObjectURL(file);
-		// 	}
-		// }); 
-
 		
 		modalConfirm.callback(function(confirm){
 			if(confirm)

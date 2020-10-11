@@ -101,7 +101,8 @@ class Validation
 		'status'       => 'required',
 		'content' => 'required',
 		'tags' => 'required',
-		'id_categori' => 'required'
+		'id_categori' => 'required',
+		'createby' => 'required',
 	];
 
 	public $article_errors = [
@@ -120,8 +121,98 @@ class Validation
 		],
 		'id_categori'=>[
 			'required'  => 'Category wajib diisi.'
+		],
+		'createby'=>[
+			'required'  => 'CreateBy wajib diisi.'
 		]
 	];
+
+	public $warta = [
+		'title'         => 'required|min_length[10]',
+		'description'   => 'required|min_length[10]',
+		'id_categori'	=> 'required',
+		'status'		=> 'required',
+		'timepublish' 	=> 'required'
+		 
+	];
+
+	public $warta_errors = [
+		'title'=> [
+			'required'  => 'Judul wajib diisi.',
+			'min_length' => 'Judul Minimal 10 Karakter'
+		],
+		'description'=> [
+			'required'  => 'Keterangan wajib diisi.',
+			'min_length' => 'Keterangan Minimal 10 Karakter'
+		],
+		'id_categori'=>[
+			'required'  => 'Category wajib diisi.'
+		],
+		'status'=> [
+			'required'  => 'Status wajib diisi.'
+		],
+		'timepublish'=>[
+			'required'  => 'Waktu wajib diisi.'
+		] 
+	];
+
+	public $lookup = [
+		'valueCategory'         => 'required[2]',
+		'description'   => 'required|min_length[10]',
+		'idlookupCategory'	=> 'required',
+		'status'		=> 'required'
+	];
+
+	public $lookup_errors = [
+		'valueCategory'=> [
+			'required'  => 'Value wajib diisi.',
+			'min_length' => 'Value Minimal 10 Karakter'
+		],
+		'description'=> [
+			'required'  => 'Keterangan wajib diisi.',
+			'min_length' => 'Keterangan Minimal 10 Karakter'
+		],
+		'idlookupCategory'=>[
+			'required'  => 'Kategori wajib diisi.'
+		],
+		'status'=> [
+			'required'  => 'Status wajib diisi.'
+		]
+	];
+
+	public $account = [
+		'name'         => 'required',
+		'email'   => 'required',
+		'roles'	=> 'required',
+		'status'		=> 'required'
+	];
+
+	public $account_errors = [
+		'name'=> [
+			'required'  => 'Nama wajib diisi.'
+		],
+		'email'=> [
+			'required'  => 'Email wajib diisi.'
+		],
+		'roles'=>[
+			'required'  => 'Role wajib diisi.'
+		],
+		'status'=> [
+			'required'  => 'Status wajib diisi.'
+		]
+	];
+
+	public $chnagePassword = [
+		'password'		=> 'required'
+	];
+
+	public $chnagePassword_errors = [
+		'password'=> [
+			'required'  => 'Password wajib diisi.'
+		] 
+	];
+
+	
 	//--------------------------------------------------------------------
 	// Rules
 	//--------------------------------------------------------------------

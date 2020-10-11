@@ -18,15 +18,21 @@ var app = new Vue({
     listTags: [],
     listDetailArticle: [],
     listCategory: [],
+    listLookup : [],
     BaseUrl : page.BaseUrl,
-		BaseUrlroot : page.BaseUrlroot
+    BaseUrlroot : page.BaseUrlroot,
+    rolesId : Cookies.get('roles'),
+    userId : Cookies.get('id'),
   },
   mounted: function() {
+    Auth.getToken();
+    CKEDITOR.replace('content');
+    this.idArticleParam = page.getQueryParam("id_article");
     this.InitOnload();
+    this.GetLookup();
     this.GetCategory();
     this.InitDelete();
     this.GetTags();
-    this.idArticleParam = page.getQueryParam("id_article");
     if (this.idArticleParam != "") {
       this.isUpdateStatus = true;
       this.GetDataArticle(this.idArticleParam);
@@ -35,7 +41,7 @@ var app = new Vue({
       $('#loading').hide();
       $('#articleDetailPage').show();
     }
-    CKEDITOR.replace('content');
+    
 
   },
   methods: {
@@ -86,11 +92,10 @@ var app = new Vue({
             allowClear: true,
             width: "100%",
             data: app.listTags,
-            maximumSelectionLength: 10,
+            maximumSelectionLength: 5,
             tags: true,
             tokenSeparators: [',', ' ']
           });
-          $('#tags').val(null).trigger('change.select2');
         }
       }).fail(function(jqxhr) {
         app.renderTable([]);
@@ -100,6 +105,50 @@ var app = new Vue({
         $('#loading').hide();
       });
     },
+    GetLookup: function() {
+      $.ajax({
+        type: "GET",
+        contentType: "application/json",
+        dataType: 'json',
+        url: this.BaseUrl + 'lookup',
+        success: function(Result) {
+          var listData = [];
+          $.each(Result.data, function(key, value) {
+
+            var getData = {
+              id: value.code,
+              text: value.valueCategory,
+              status: value.idlookupCategory
+            };
+            listData.push(getData);
+          });
+
+          var setnew = $.grep(listData, function(val, key) {
+            return val.status == 2;
+          });
+          listLookup = setnew;
+          app.loadStatus(setnew);
+        }
+      }).fail(function(jqxhr) {
+        app.renderTable([]);
+        $('#alertMessagePage').show();
+        $('#alertMessage').addClass('alert-danger');
+        $('#MainMessage').html('<span><b> Perhatian - </b> Terjadi kesalahan saat meminta data lookup, Info : ' + jqxhr.statusText + '</span>');
+        $('#loading').hide();
+      });
+    },
+    loadStatus: function(listData) {
+
+      $("#status").select2({
+        theme: 'bootstrap4',
+        dropdownParent: $('#StatusPage'),
+        width: "100%",
+        placeholder: "Status",
+        data:listData,
+        minimumResultsForSearch: -1
+      });
+    },
+   
     preview: function() {
       $('#articleDetail').hide();
       $('#articleDetailPreview').show();
@@ -156,23 +205,23 @@ var app = new Vue({
             app.listDetailArticle.push(Result.data);
             app.oldfilename = Result.data.poster;
             this.judularticle = Result.data.judul;
-            // this.status =  Result.data.status_categori; 
+              
             var splistr = Result.data.tags.split(',');
             var setData = [];
             for (var i = 0; i < splistr.length; i++) {
               setData.push(splistr[i]);
             }
+             
             $('#tags').val(setData).trigger('change.select2');
             $('#judul').val(Result.data.judul);
             $('#category').val(Result.data.id_categori).trigger('change');
-            $('#status').val(Result.data.status_categori).trigger('change');
+            $('#status').val(Result.data.status).trigger('change');
             CKEDITOR.instances.content.setData(Result.data.content);
           }
           $('#loading').hide();
           $('#articleDetailPage').show();
         }
       }).fail(function(jqxhr) {
-        // app.renderTable([]);
         $('#alertMessagePage').show();
         $('#alertMessage').addClass('alert-danger');
         $('#MainMessage').html('<span><b> Perhatian - </b> Terjadi kesalahan saat meminta data, Info : ' + jqxhr.statusText + '</span>');
@@ -194,8 +243,9 @@ var app = new Vue({
         formData.append('keterangan', dataKeterangan);
         formData.append('category', category);
         formData.append('fileupload', filename);
-        formData.append('status', 0);
-        formData.append('url', url);
+        formData.append('status', "A002");
+        formData.append('url', url);  
+        formData.append('createby', this.userId); 
         formData.append('tags', tags);
         var l = Ladda.create(document.querySelector('#saveAdd'));
         $.ajax({
@@ -228,10 +278,7 @@ var app = new Vue({
             }
             $('#CategoryModal').modal("hide");
             $('#alertMessagePage').show();
-
-            $('#MainMessage').html(`
-					<span><b> ` + statusMessage + ` - </b>` + data.message + ` </span>
-					`);
+            $('#MainMessage').html("<span><b> " + statusMessage + " - </b>" + data.message + " </span>");
             l.stop();
           }
         }).fail(function(jqxhr) {
@@ -245,20 +292,21 @@ var app = new Vue({
       }
     },
     update: function() {
-      if ($("#FormArticleDetail").valid()) {
-        var dataAgenda = $('#judul').val();
-        var dataKeterangan = CKEDITOR.instances.content.getData();
-        var category = $('#category').val();
-        var tags = $('#tags').val();
-        console.log(tags);
-        var filename = app.$refs.file.files[0];
-        var formData = new FormData();
+      if ($("#FormArticleDetail").valid()) 
+      {
+        var dataAgenda      = $('#judul').val();
+        var dataKeterangan  = CKEDITOR.instances.content.getData();
+        var category  = $('#category').val();
+        var tags      = $('#tags').val();
+        var filename  = app.$refs.file.files[0];
+        var formData  = new FormData();
         formData.append('judul', dataAgenda);
         formData.append('keterangan', dataKeterangan);
         formData.append('category', category);
         formData.append('fileupload', filename);
         formData.append('status', $('#status').val());
         formData.append('tags', tags);
+        formData.append('updateby', this.userId); 
         formData.append('oldfileupload', app.oldfilename);
         var l = Ladda.create(document.querySelector('#saveUpdate'));
         $.ajax({
@@ -296,14 +344,8 @@ var app = new Vue({
             }
             $('#CategoryModal').modal("hide");
             $('#alertMessagePage').show();
-
-            $('#MainMessage').html(`
-					<span><b> ` + statusMessage + ` - </b>` + data.message + ` </span>
-					`);
+            $('#MainMessage').html("<span><b> " + statusMessage + " - </b>" + data.message + " </span>");
             l.stop();
-
-            // app.GetDataArticle();
-
           }
         }).fail(function(jqxhr) {
           l.stop();
@@ -312,7 +354,6 @@ var app = new Vue({
           $('#alertMessage').addClass("alert-danger");
           $('#status').text("Fail");
           $('#statusMessage').text(jqxhr.responseJSON);
-          // app.GetDataArticle();
         });
       }
     },
@@ -330,8 +371,6 @@ var app = new Vue({
         allowClear: true
       });
       $("#category").val("").trigger("change");
-
-
     },
     articleDetail: function(id_article = null) {
       window.location.assign(app.BaseUrlroot + 'page/topministry/main/articledetail?id_article=' + id_article);
@@ -455,45 +494,7 @@ var app = new Vue({
       $('#closepage').click(function() {
         app.closewindow();
       });
-
-      $("#status").select2({
-        theme: 'bootstrap4',
-        dropdownParent: $('#StatusPage'),
-        width: "100%",
-        placeholder: "Status",
-        data: [{
-            id: 0,
-            text: "No Active"
-          },
-          {
-            id: 1,
-            text: "Active"
-          }
-        ],
-        minimumResultsForSearch: -1
-      });
-
-      // 	$("#fileupload").change(function(e) {
-      // 	var _URL = window.URL || window.webkitURL;
-      // 	var file, img;
-      // 	if ((file = this.files[0])) {
-      // 		img = new Image();
-      // 		img.onload = function() {
-      // 			if(this.width == 300 && this.height == 500){
-      // 				sizeValidate
-      // 			}else{
-
-      // 			}
-      // 			alert(this.width + " " + this.height);
-      // 		};
-      // 		img.onerror = function() {
-      // 			$("#fileupload").val(null);
-      // 			alert( "not a valid file: " + file.type);
-      // 		};
-      // 		img.src = _URL.createObjectURL(file);
-      // 	}
-      // }); 
-
+ 
       $('#category').change(function() {
         if ($('#category').val() != "") {
 

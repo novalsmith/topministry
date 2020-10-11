@@ -42,11 +42,9 @@
                 <div class="form-group" id="StatusPage" v-show="isUpdate">
                 <label for="">Status</label>
                 <select name="statusVideo" class="form-control" id="status" v-model="status">
-                <option value=""></option>
-                <option value="1">Active</option>
-                <option value="0">No Active</option>
                 </select>
                 </div>
+
                 <div class="form-group" id="keterangan">
                 <label for="">Keterangan</label>
               <textarea class="form-control" id="keterangan" name="keterangan" v-model="keterangan"></textarea>
@@ -71,11 +69,11 @@
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="CategoryModalLabels">Confirm !</h5>
+              <h5 class="modal-title" id="CategoryModalLabels">Konfirmasi !</h5>
             </div>
             <div class="modal-body">
           
-                <span>Are you sure, for delete this record ?<span>
+                <span>Anda yakin, untuk hapus data ini ?<span>
                 </div>
             <div class="modal-footer">
             <button type="button" id="modal-btn-true" v-on:click="deleteAction" class="btn btn-primary btn-md pl--20" data-style="zoom-out"><i class="fa fa-trash"></i> Yes</button>
@@ -107,7 +105,7 @@
   </div>
 <!-- Modal Preview Video -->
 
-<div class="alert" role="alert" id="result"></div>
+<!-- <div class="alert" role="alert" id="result"></div> -->
     <div class="container pt-150">
         <div class="card card-profile shadow mt--300 pb-50" style="min-height:300px; margin-bottom:100px">
         <div class="d-flex justify-content-center">
@@ -143,7 +141,7 @@
                   <tr>
                   <th>#</th>
                   <th>Judul</th>
-                  <th>Category</th>
+                  <th>Kategori</th>
                   <th>Status</th>
                   <th></th>
                   </tr>

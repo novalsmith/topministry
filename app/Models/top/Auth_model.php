@@ -2,19 +2,18 @@
 namespace App\Models\top;
 use CodeIgniter\Model;
 class Auth_model extends Model{
-    protected $table = "hakakses";
+    protected $table = "account";
  
 
-    public function getuser($id)
+    public function getuser($email,$password)
     {
-        $whereData = "";
-        if($id !=""){
-            $whereData = "WHERE id_hakakses=".$id;
+        {
+            $params = [
+                'email'     => $email,
+                'password'  => $password
+            ];
+            return $this->getWhere($params)->getRowArray();
         }
-        $data = "SELECT * FROM ".$this->table." ".$whereData;
-
-        $query = $this->db->query($data)->getResult();
-        return $query;
     }
     public function getuserAlready($username,$email)
     {
@@ -29,11 +28,11 @@ class Auth_model extends Model{
     public function cek_login($userName)
     {
         $query = $this->table($this->table)
-                ->where('username', $userName)
+                ->where('email', $userName)
                 ->countAll();
         if($query >  0){
             $hasil = $this->table($this->table)
-                ->where('username', $userName)
+                ->where('email', $userName)
                 ->limit(1)
                 ->get()
                 ->getRowArray();

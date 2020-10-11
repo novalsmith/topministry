@@ -3,11 +3,11 @@
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="CategoryModalLabels">Confirm !</h5>
+              <h5 class="modal-title" id="CategoryModalLabels">Konfirmasi !</h5>
             </div>
             <div class="modal-body">
           
-                <span>Are you sure, for delete this record ?<span>
+                <span>Anda yakin, untuk hapus data ini ?<span>
                 </div>
             <div class="modal-footer">
             <button type="button" id="modal-btn-article-true"  class="btn btn-primary btn-md pl--20" data-style="zoom-out"><i class="fa fa-trash"></i> Yes</button>
@@ -20,7 +20,6 @@
 
 <!-- End Confirm Delete -->
 
-<div class="alert" role="alert" id="result"></div>
     <div class="container pt-150">
         <div class="card card-profile shadow mt--300 pb-50" style="min-height:300px; margin-bottom:100px">
         <div class="d-flex justify-content-center">
@@ -37,7 +36,7 @@
         <div class="HidePage" id="VideoPage">  
               <div class="mb-1">
                   <div class="row m-2 col-md-12">
-                  <h4 class="text text-muted">Article</h4>
+                  <h4 class="text text-muted">Artikel</h4>
               </div>
               <div class="row m-2 pt-2 pb-2" style="background-color:#f5f7f9">
                     <div class="col-md-6">
@@ -53,7 +52,7 @@
                   <tr>
                   <th>#</th>
                   <th>Judul</th>
-                  <th>Category</th>
+                  <th>Kategori</th>
                   <th>Status</th>
                   <th></th>
                   </tr>
@@ -63,8 +62,6 @@
           </div>
           </div>
         </div>
-
     </div>
 
-    
     <script src="<?php echo base_url("top/assets/js/article.js?v=").JsandCssVersion ?>"></script>

@@ -13,13 +13,16 @@ var app = new Vue({
 		url : "",
 		fileupload : "",
         listDataVideo : [],
-        listCategory : [],
+		listCategory : [],
+		listLookup : [],
 		BaseUrl : page.BaseUrl,
 		BaseUrlroot : page.BaseUrlroot
 	},
 	mounted : function() {
+		Auth.getToken();
 		this.InitOnload();
-        this.GetDataVideo();
+		this.GetLookup();
+		this.GetDataVideo();
 		this.GetCategory();
 	},
     methods:
@@ -66,7 +69,7 @@ var app = new Vue({
                         });	 
 					});
 				var isActiveData =	$.grep(lisdata, function(val, key){
-					return val.status == 1;
+					return val.status == "A001";
 					});
 					app.listCategory.push(isActiveData);
 					app.InitListBox();
@@ -79,7 +82,51 @@ var app = new Vue({
 				$('#loading').hide();
 			});
 		},
+		GetLookup: function() {
+			$.ajax({
+			  type: "GET",
+			  contentType: "application/json",
+			  dataType: 'json',
+			  url: this.BaseUrl + 'lookup',
+			  success: function(Result) {
+				var listData = [];
+				$.each(Result.data, function(key, value) {
+	  
+				  var getData = {
+					id: value.code,
+					text: value.valueCategory,
+					status: value.idlookupCategory
+				  };
+				  listData.push(getData);
+				});
+	  
+				var setnew = $.grep(listData, function(val, key) {
+				  return val.status == 2;
+				});
+				listLookup = setnew;
+				app.loadStatus(setnew);
+			  }
+			}).fail(function(jqxhr) {
+			  app.renderTable([]);
+			  $('#alertMessagePage').show();
+			  $('#alertMessage').addClass('alert-danger');
+			  $('#MainMessage').html('<span><b> Perhatian - </b> Terjadi kesalahan saat meminta data lookup, Info : ' + jqxhr.statusText + '</span>');
+			  $('#loading').hide();
+			});
+		  },
+		  loadStatus: function(listData) {
+
+			$("#status").select2({
+				theme: 'bootstrap4',
+				dropdownParent: $('#StatusPage'),
+				width: "100%", 
+				placeholder: "Status",
+				data: listData,
+				minimumResultsForSearch: -1
+				});
+		  },
 		InitListBox :  function(){
+			 
             $("#category").select2({
                 theme: 'bootstrap4',
                 dropdownParent: $('#CategoryPages'),
@@ -105,7 +152,7 @@ var app = new Vue({
 				formData.append('keterangan',dataKeterangan);
 				formData.append('category',category);
 				formData.append('fileupload',filename);
-				formData.append('status',0);
+				formData.append('status',"A002");
 				formData.append('url',url);
 				var l = Ladda.create( document.querySelector( '#saveAddAgenda'));
 			$.ajax({
@@ -171,7 +218,7 @@ var app = new Vue({
 				this.resetAlert();
 
 				$('#showimage').hide();
-				$('#CategoryModalLabel').text("Add Video");
+				$('#CategoryModalLabel').text("Tambah Video");
 				$('#category').val("").trigger("change");
 				$('#CategoryModal').modal("show");
 				
@@ -205,7 +252,7 @@ var app = new Vue({
 			}
 			$('#fileupload').val("");
 			this.resetAlert();
-			$('#CategoryModalLabel').text("Update Video");
+			$('#CategoryModalLabel').text("Ubah Video");
 			$('#CategoryModal').modal("show");
 		},
 		UpdateAction:function(){
@@ -333,13 +380,16 @@ var app = new Vue({
                 { data: "nama_categori"},
 				{
 					render: function ( data, type, row ) {
-						return '<span class="badge badge-secondary">'+(row["status"]==1 ? "Active":"No Active")+'</span>'
+						var statusName = $.grep(listLookup, function(val, key) {
+							return val.id == row.status;
+						  })[0];
+						  return '<span class="badge badge-secondary">' + (statusName.text) + '</span>';
 					},
 					width:"10%",
 				},
 				{
 					render: function ( data, type, row ) {
-						return '<a href="javascript:" class="badge badge-primary" onclick="app.update(\''+ row["id_video"]+ '\');">View</a>';
+						return '<a href="javascript:" class="badge badge-primary" onclick="app.update(\''+ row.id_video+ '\');">View</a>';
 					},
 					targets: -1,  // -1 is the last column, 0 the first, 1 the second, etc.
 					width:"5%",
@@ -377,7 +427,7 @@ var app = new Vue({
 
 		$("#TableVideo_filter").html("").append(`
 		<div class="pull-right mb-2">
-		<button type="button" class="btn btn-primary btn-sm" onclick="app.createNew()"> <i class="fa fa-plus"></i> Create new</button>
+		<button type="button" class="btn btn-primary btn-sm" onclick="app.createNew()"> <i class="fa fa-plus"></i> Tambah</button>
 		</div>   
 		`);
 		$('#TableVideo_length select').addClass("rounded-0");
@@ -390,23 +440,20 @@ var app = new Vue({
 		$('#alertMessagePage').hide();
 		$('#FormVideo').validate({
 			rules: {
-				judul: { required: true, minlength : 3 },
-				category : { required: true}, 
-				waktu: { required: true},
+				judul		: { required: true, minlength : 3 },
+				category 	: { required: true}, 
+				waktu		: { required: true},
 				statusVideo : { required: true},
-				url : { required: true},
-				keterangan : { required: true, minlength : 10}
+				url 		: { required: true},
+				keterangan 	: { required: true, minlength : 10}
 			},
 			messages: {
-				judul: {
-					required : "Video masih kosong",
-					minlength : "Minimal 3 karakter"
-				},
-				waktu : {	required : "Waktu masih kosong"},
+				judul		: { required : "Video masih kosong", minlength : "Minimal 3 karakter" },
+				waktu 		: {	required : "Waktu masih kosong"},
 				statusVideo : {	required : "Status masih kosong"},
-				category : {	required : "Category masih kosong"},
-				url : {	required : "Url masih kosong"},
-				keterangan : {	required : "Keterangan masih kosong", minlength : "Minimal 10 karakter"},
+				category 	: {	required : "Category masih kosong"},
+				url 		: {	required : "Url masih kosong"},
+				keterangan 	: {	required : "Keterangan masih kosong", minlength : "Minimal 10 karakter"},
 			},
 			errorPlacement: function (error, element) {
 				error.insertAfter(element.closest('div'));
@@ -415,35 +462,7 @@ var app = new Vue({
 		$('#alertMessagePage button').click(function(){
 			app.resetAlert();
 		});
-		$("#status").select2({
-			theme: 'bootstrap4',
-			dropdownParent: $('#StatusPage'),
-			width: "100%", 
-			placeholder: "Status",
-			minimumResultsForSearch: -1
-			});
-			$("#status").val(0).trigger("change");
-		// 	$("#fileupload").change(function(e) {
-		// 	var _URL = window.URL || window.webkitURL;
-		// 	var file, img;
-		// 	if ((file = this.files[0])) {
-		// 		img = new Image();
-		// 		img.onload = function() {
-		// 			if(this.width == 300 && this.height == 500){
-		// 				sizeValidate
-		// 			}else{
-
-		// 			}
-		// 			alert(this.width + " " + this.height);
-		// 		};
-		// 		img.onerror = function() {
-		// 			$("#fileupload").val(null);
-		// 			alert( "not a valid file: " + file.type);
-		// 		};
-		// 		img.src = _URL.createObjectURL(file);
-		// 	}
-		// }); 
-
+		
 		
 		modalConfirm.callback(function(confirm){
 			if(confirm)

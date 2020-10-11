@@ -15,7 +15,7 @@ class Category_model extends Model {
             }
         }else{
             if($id ==null){
-                $this->where('status_categori',1);
+                $this->where('status_categori',"A001");
                 return $this->findAll();
             } else {
                 return $this->getWhere(['id_categori' => $id])->getRowArray();
